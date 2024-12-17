@@ -4,3 +4,4 @@ node_modules
 .idea/
 app-config.yaml
 .npmrc
+.DS_Store
