@@ -18,11 +18,12 @@ import { useEffect, useState } from 'react';
 import { PaletteType, useTheme } from '@material-ui/core';
 
 import { useShadowRootElements } from '@backstage/plugin-techdocs-react';
-import mermaid from 'mermaid'
+import mermaid from 'mermaid';
 import { isMermaidCode } from './hooks';
 import { MermaidProps } from './props';
 import { BackstageTheme } from '@backstage/theme';
 import { MermaidConfig } from 'mermaid';
+import { attachPanzoom, insertPanzoomStyles } from './panzoom';
 
 export function selectConfig(backstagePalette: PaletteType, properties: MermaidProps): MermaidConfig {
   // Theme set directly in the Mermaid configuration takes
@@ -50,22 +51,33 @@ const makeDiagram = async (el: HTMLDivElement | HTMLPreElement, diagramText: str
   const diagramElement = document.createElement('div')
   diagramElement.className = "mermaid"
 
-  el.parentNode?.insertBefore(diagramElement, el.nextSibling);
-
-  const id = `mermaid-${diagramId++}`
+  const id = `mermaid-${diagramId++}`;
   const { svg, bindFunctions } = await mermaid.render(id, diagramText);
-  diagramElement.innerHTML = svg
   bindFunctions?.(diagramElement);
+
+  diagramElement.innerHTML = svg;
+  if (el.dataset.panzoom === 'true') {
+    attachPanzoom(el, diagramElement);
+  } else {
+    el.parentNode?.insertBefore(diagramElement, el.nextSibling);
+  }
 }
 
 export const MermaidAddon = (properties: MermaidProps) => {
   const highlightTables = useShadowRootElements<HTMLDivElement>(['.highlighttable']);
   const highlightDivs = useShadowRootElements<HTMLDivElement>(['.highlight']);
   const mermaidPreBlocks = useShadowRootElements<HTMLPreElement>(['.mermaid']);
+  const [headElement] = useShadowRootElements<HTMLHeadElement>(['head']);
   const theme = useTheme<BackstageTheme>();
-  
 
   const [ initialized, setInitialized ] = useState(false);
+
+  useEffect(() => {
+    if ([ ...highlightTables, ...highlightDivs, ...mermaidPreBlocks]
+      .some(el => el.dataset.panzoom === 'true')) {
+        insertPanzoomStyles(headElement);
+    }
+  }, []);
 
   useEffect(() => {
     if (initialized) {
@@ -103,7 +115,7 @@ export const MermaidAddon = (properties: MermaidProps) => {
         return
       }
 
-      makeDiagram(highlightTable, diagramText)
+      makeDiagram(highlightTable, diagramText);
     });
   }, [initialized, highlightTables]);
 

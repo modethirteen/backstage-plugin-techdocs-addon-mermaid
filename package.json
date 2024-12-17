@@ -40,6 +40,7 @@
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "4.0.0-alpha.61",
     "mermaid": "^11.3.0",
+    "panzoom": "^9.4.3",
     "react-use": "^17.2.4"
   },
   "peerDependencies": {

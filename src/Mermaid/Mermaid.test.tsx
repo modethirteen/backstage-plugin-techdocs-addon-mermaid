@@ -104,4 +104,39 @@ describe('Mermaid', () => {
       expect(config).toEqual({ theme: 'dark'});
     });
   });
+
+  describe('panzoom', () => {
+
+    it('hides panning and zooming options by default', async () => {
+      const { shadowRoot } = await TechDocsAddonTester.buildAddonsInTechDocs([
+        <Mermaid />,
+      ])
+        .withDom(
+          <body>
+            <pre className="mermaid">
+              <code>flowchart LR</code>
+            </pre>
+          </body>
+        )
+        .renderWithEffects();
+      const box = shadowRoot?.querySelector('.panzoom-box');
+      expect(box).toBeNull();
+    });
+
+    it('adds panning and zooming options if enabled', async () => {
+      const { shadowRoot } = await TechDocsAddonTester.buildAddonsInTechDocs([
+        <Mermaid />,
+      ])
+        .withDom(
+          <body>
+            <pre className="mermaid" data-panzoom="true">
+              <code>flowchart LR</code>
+            </pre>
+          </body>
+        )
+        .renderWithEffects();
+      const box = shadowRoot?.querySelector('.panzoom-box');
+      expect(box).not.toBeNull();
+    });
+  });
 });
